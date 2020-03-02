@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+    <mapper namespace="com.manage.meeting.mapper.MeetingMapper">
+    	<update id="meetingPass">
+    		update meeting set status = '1' where id = #{id}
+    	</update>
+    	<update id="meetingRefuse">
+    		update meeting set status = '2' where id = #{id}
+    	</update>
+    	<update id="useMeetingRoom">
+    		update meeting_room set status = '1' where id = #{meetingRoomId}
+    	</update>
+    	<update id="freeMeetingRoom">
+    		update meeting_room set status = '0' where id = #{meetingRoomId}
+    	</update>
+    	<select id="listMeetingUsers" resultType="User">
+    		select u.name, u.id from user u left join meeting_user mu on mu.user_id = u.id left join meeting m on m.id = mu.meeting_id where m.id = #{id}
+    	</select>
+    	<insert id="meetingUserAdd">
+    		insert into meeting_user(meeting_id, user_id) values(#{meetingId}, #{userId})
+    	</insert>
+    	<insert id="meetingApply" useGeneratedKeys="true" keyProperty="id">
+    		insert into meeting(title, use_machine, important, start_time, end_time, meeting_room_id, status, user)
+    		values(#{title}, #{useMachine}, #{important}, #{startTime}, #{endTime}, #{meetingRoomId}, '0', #{user})
+    	</insert>
+    	<insert id="meetingReservation" useGeneratedKeys="true" keyProperty="id">
+    		insert into meeting(title, use_machine, important, start_time, end_time, meeting_room_id, status, res_status, user)
+    		values(#{title}, #{useMachine}, #{important}, #{startTime}, #{endTime}, #{meetingRoomId}, '0', '1', #{user})
+    	</insert>
+    	<select id="listMyMeetings" resultType="Meeting">
+    		select id, use_machine as 'useMachine', start_time as 'startTime', end_time as 'endTime', meeting_room_id as 'meetingRoomId',
+    		title, important, status, res_status as resStatus, user from meeting where user = #{user}
+    		<if test="keyword != null">
+    			and title like concat('%', #{keyword}, '%')
+    		</if>
+    		order by id desc
+    	</select>
+    	<select id="currentMeetings" resultType="Meeting">
+    		select * from meeting where status = '1'
+    		and unix_timestamp(#{currentTime}) between unix_timestamp(start_time) and unix_timestamp(end_time)
+    	</select>
+    	<select id="list" resultType="Meeting">
+    		select id, use_machine as 'useMachine', start_time as 'startTime', end_time as 'endTime', meeting_room_id as 'meetingRoomId',
+    		title, important, status, res_status as resStatus, user from meeting
+    		<if test="keyword != null">
+    			where title like concat('%', #{keyword}, '%')
+    		</if>
+    		order by id desc
+    	</select>
+    	<select id="meetingsCheck" resultType="Meeting">
+    		select id, use_machine as 'useMachine', start_time as 'startTime', end_time as 'endTime', meeting_room_id as 'meetingRoomId',
+    		title, important, status, res_status as resStatus, user from meeting where res_status is null
+    		<if test="keyword != null">
+    			and title like concat('%', #{keyword}, '%')
+    		</if>
+    		order by id desc
+    	</select>
+    	<select id="meetingsReservation" resultType="Meeting">
+    		select id, use_machine as 'useMachine', start_time as 'startTime', end_time as 'endTime', meeting_room_id as 'meetingRoomId',
+    		title, important, status, res_status as resStatus, user from meeting where res_status = '1'
+    		<if test="keyword != null">
+    			and title like concat('%', #{keyword}, '%')
+    		</if>
+    		order by id desc
+    	</select>
+    	<delete id="cancelReservation">
+    		delete from meeting where id = #{id}
+    	</delete>
+    	<delete id="deleteUserByMeeting">
+    		delete from meeting_user where meeting_id = #{meetingId}
+    	</delete>
+    </mapper>

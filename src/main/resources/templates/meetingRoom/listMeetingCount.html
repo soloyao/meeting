@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<div th:replace="include::include"></div>
+	<script src="./static/js/common/component-pager.js"></script>
+	<script src="./static/js/common/component-table.js"></script>
+	<link href="./static/css/common/datetimepicker.min.css" rel="stylesheet" />
+	<script src="./static/js/common/datetimepicker.min.js"></script>
+	<link href="./static/css/meetingRoom/meetingCommon.css" rel="stylesheet" />
+	<script src="./static/js/meetingRoom/meetingCount.js"></script>
+</head>
+<body>
+	<div id="app">
+		<div class="col-md-12 content table-content load-indicator" :class="isLoading?'loading':''" data-loading="正在加载">
+			<div class="panel">
+				<div class="panel-heading">
+					<!-- top start -->
+					<div id="top-div">
+						<!-- search start -->
+						<div class="input-group search-div">
+							<input type="text" class="form-control" id="date" placeholder="请选择日期" readonly>
+							<span class="input-group-btn">
+								<button class="btn btn-primary" @click="search">搜索</button>
+								<button class="btn btn-default" @click="reset">重置</button>
+							</span>
+						</div>
+						<!-- search end -->
+					</div>
+					<!-- top end -->
+				</div>
+				<div class="panel-body">
+					<!-- table start -->
+					<div style="height:38px;">
+						<table class="table table-hover table-striped" style="margin:0px;">
+							<thead>
+								<th><div @click="checkboxAll" class="checkbox-primary checkbox-parent" style="width:16px;"><label></label></div></th>
+								<th width="249">编号</th>
+								<th width="249">会议主题</th>
+								<th width="249">开始时间</th>
+								<th width="249">结束时间</th>
+								<th width="249">发起人</th>
+								<th width="249">状态</th>
+								<th width="249">操作</th>
+							</thead>
+						</table>
+					</div>
+					<div v-if="meetings && meetings.length > 0" style="height:calc(100% - 38px);overflow:auto;">
+						<table class="table table-hover table-striped">
+							<tbody>
+								<tr v-for="meeting in meetings">
+									<td><div class="checkbox" class="checkbox-primary checkbox-children" style="width:16px;" :data-id="meeting.id"><label></label></div></td>
+									<td width="249">{{meeting.id}}</td>
+									<td width="249">{{meeting.title}}</td>
+									<td width="249">{{meeting.startTime}}</td>
+									<td width="249">{{meeting.endTime}}</td>
+									<td width="249">{{meeting.user}}</td>
+									<td v-if="meeting.status == 0" width="249" style="color:orange;">未审批</td>
+									<td v-if="meeting.status == 1" width="249" style="color:green;">通过</td>
+									<td v-if="meeting.status == 2" width="249" style="color:red;">驳回</td>
+									<td width="249"><a class="btn btn-xs btn-link" @click="detail(meeting)">详情</a></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div v-if="meetings && meetings.length == 0" style="height:calc(100% - 38px);overflow:auto;">
+						<div style="color:#999;padding:15px;line-height:100px;">暂无数据</div>
+					</div>
+					<!-- table end -->
+				</div>
+				<div class="panel-footer">
+					<!-- page start -->
+					<component-pager v-bind.sync="pagination" v-on:list="list"></component-pager>
+					<!-- page end -->
+				</div>
+			</div>
+		</div>
+		
+		<!-- 会议申请详情框 -->
+		<div class="modal fade" id="detailModal">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button class="close" data-dismiss="modal"><span aria-hidden="true">x</span><span class="sr-only">关闭</span></button>
+						<h4 class="modal-title">{{detailTitle}}</h4>
+					</div>
+					<div class="modal-body" style="height:480px;">
+						<div class="col-md-12 content">
+							<div class="panel" style="overflow:auto;">
+								<div class="panel-heading">会议详情</div>
+								<div class="panel-body">
+									<div class="form-horizontal">
+										<div class="form-group">
+											<label for="title" class="col-sm-2 required">会议主题</label>
+											<div class="col-sm-9">
+												<input class="form-control" v-model="meetingDetail.title" id="title" placeholder="会议主题" readonly>
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="machine" class="col-sm-2 required">是否使用设备</label>
+											<div class="col-sm-9">
+												<input class="form-control" id="machine" v-model="meetingDetail.useMachine==1?'是':'否'" readonly>
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="startTime" class="col-sm-2 required">开始时间</label>
+											<div class="col-sm-9">
+												<input class="form-control" id="startTime" v-model="meetingDetail.startTime" placeholder="开始时间" readonly>
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="endTime" class="col-sm-2 required">结束时间</label>
+											<div class="col-sm-9">
+												<input class="form-control" id="endTime" v-model="meetingDetail.endTime" placeholder="结束时间" readonly>
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="important" class="col-sm-2 required">是否为重大紧急会议</label>
+											<div class="col-sm-9">
+												<input class="form-control" id="important" v-model="meetingDetail.important==1?'是':'否'" readonly>
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="users" class="col-sm-2 required">参会人员</label>
+											<div class="col-sm-9">
+												<textarea class="form-control" id="users" v-model="meetingDetail.users" readonly></textarea>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- 会议申请详情框结束 -->
+	</div>
+</body>
+</html>

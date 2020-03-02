@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+    <mapper namespace="com.manage.meeting.mapper.MeetingRoomMapper">
+    	<select id="list" resultType="MeetingRoom">
+    		select * from meeting_room
+    		<if test="keyword != null">
+    			where name like concat('%', #{keyword}, '%')
+    		</if>
+    		order by id desc
+    	</select>
+    	<insert id="add">
+    		insert into meeting_room(name, address, count, machine, remark) values(#{name}, #{address}, #{count}, #{machine}, #{remark})
+    	</insert>
+    	<delete id="delete">
+    		delete from meeting_room where id = #{id}
+    	</delete>
+    	<update id="update">
+    		update meeting_room set name = #{name}, address = #{address}, count = #{count}, machine = #{machine}, remark = #{remark} where id = #{id}
+    	</update>
+    	<select id="get" resultType="MeetingRoom">
+    		select * from meeting_room where id = #{id}
+    	</select>
+    	<select id="exist" resultType="int">
+    		select count(*) from meeting where meeting_room_id = #{meetingRoomId} and status = '1'
+    		and unix_timestamp(#{currentTime}) between unix_timestamp(start_time) and unix_timestamp(end_time)
+    	</select>
+    	<select id="meetingCounts" resultType="Meeting">
+    		select id, use_machine as 'useMachine', start_time as 'startTime', end_time as 'endTime', meeting_room_id as 'meetingRoomId',
+    		title, important, status, user from meeting
+    		<if test="startTime != null">
+    			where unix_timestamp(start_time) between unix_timestamp(#{startTime}) and unix_timestamp(#{endTime})
+    		</if>
+    	</select>
+    </mapper>

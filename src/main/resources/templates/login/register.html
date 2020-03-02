@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<div th:replace="include::include"></div>
+	<link href="./static/css/login/register.css" rel="stylesheet" />
+	<script src="./static/js/login/register.js"></script>
+</head>
+<body>
+	<div id="app" class="wrap login_wrap">
+		<div class="index">
+			<a href="index">
+				<div class="logo">
+				</div>
+			</a>
+			<div class="login_box">
+				<div class="login_form">
+					<div class="login_title">
+						注册
+					</div>
+					<div class="form_text_ipt">
+						<input type="text" id="register-name" placeholder="用户名" v-model="user4Register.name" />
+					</div>
+					<div class="form_text_ipt">
+						<input type="password" placeholder="密码" v-model="user4Register.password" @keydown="registerKeyDown" />
+					</div>
+					<div class="form_btn">
+						<button @click="register">注册</button>
+					</div>
+					<div class="form_reg_btn">
+						<a href="javascript:void(0);" @click="login" style="display:inline-block;float:left;">登录</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
